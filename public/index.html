@@ -1,12 +1,50 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Clipboard Bridge</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 50px; }
-    textarea { width: 100%; height: 150px; }
-    button { padding: 10px 20px; margin-top: 10px; }
+    body { 
+      font-family: 'Roboto', sans-serif; 
+      margin: 50px; 
+      background: linear-gradient(135deg, #2b5876, #4e4376);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    h1 {
+      font-size: 3em;
+      margin-bottom: 20px;
+    }
+    textarea { 
+      width: 100%; 
+      max-width: 800px;
+      height: 200px; 
+      padding: 15px;
+      border: none;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      resize: none;
+    }
+    button { 
+      padding: 15px 30px; 
+      margin: 20px 10px; 
+      background-color: #ff4081;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #e91e63;
+    }
+    button:active {
+      background-color: #ad1457;
+    }
   </style>
 </head>
 <body>
@@ -17,7 +55,7 @@
 <button onclick="copyText()">Copy to Device Clipboard</button>
 <button onclick="syncText()">Sync Across Devices</button>
 
-<script src="/socket.io/socket.io.js"></script>
+<script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script> <!-- Ensure Socket.IO is loaded from CDN if not served locally -->
 <script>
   const sessionId = prompt('Enter session ID:') || 'default';
   const socket = io({ query: { sessionId } });
@@ -46,6 +84,15 @@
     socket.emit('clipboard', text);
     alert('Text synced across devices!');
   }
+
+  socket.on('connect_error', (error) => {
+    console.error('Connection Error:', error);
+    alert('Failed to connect to server. Please check your connection.');
+  });
+
+  socket.on('reconnect_attempt', () => {
+    console.log('Attempting to reconnect...');
+  });
 </script>
 
 </body>
