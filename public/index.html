@@ -8,11 +8,20 @@
       font-family: 'Roboto', sans-serif; 
       margin: 50px; 
       background: linear-gradient(135deg, #2b5876, #4e4376);
+      background-size: 400% 400%;
+      animation: gradientAnimation 15s ease infinite;
       color: white;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
+
+    @keyframes gradientAnimation {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
     h1 {
       font-size: 3em;
       margin-bottom: 20px;
@@ -29,6 +38,10 @@
       color: white;
       resize: none;
     }
+    textarea:focus {
+      outline: none;
+      box-shadow: 0 0 10px 2px rgba(255, 64, 129, 0.7);
+    }
     button { 
       padding: 15px 30px; 
       margin: 20px 10px; 
@@ -37,13 +50,18 @@
       border: none;
       border-radius: 30px;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      transition: background-color 0.3s ease, transform 0.3s ease;
     }
     button:hover {
       background-color: #e91e63;
+      transform: scale(1.1);
     }
     button:active {
       background-color: #ad1457;
+    }
+    #spinner {
+      display: none;
+      margin-top: 20px;
     }
   </style>
 </head>
@@ -54,8 +72,21 @@
 <br>
 <button onclick="copyText()">Copy to Device Clipboard</button>
 <button onclick="syncText()">Sync Across Devices</button>
+<div id="spinner">
+  <svg width="50px" height="50px" viewBox="0 0 100 100">
+    <circle cx="50" cy="50" r="45" stroke="#ff4081" stroke-width="10" fill="none" stroke-linecap="round">
+      <animateTransform 
+        attributeName="transform" 
+        type="rotate" 
+        from="0 50 50" 
+        to="360 50 50" 
+        dur="1s" 
+        repeatCount="indefinite" />
+    </circle>
+  </svg>
+</div>
 
-<script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script> <!-- Ensure Socket.IO is loaded from CDN if not served locally -->
+<script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
 <script>
   const sessionId = prompt('Enter session ID:') || 'default';
   const socket = io({ query: { sessionId } });
@@ -82,7 +113,11 @@
   function syncText() {
     const text = textarea.value;
     socket.emit('clipboard', text);
-    alert('Text synced across devices!');
+    document.getElementById('spinner').style.display = 'block';
+    setTimeout(() => {
+      document.getElementById('spinner').style.display = 'none';
+      alert('Text synced across devices!');
+    }, 2000); // Simulate sync delay
   }
 
   socket.on('connect_error', (error) => {
